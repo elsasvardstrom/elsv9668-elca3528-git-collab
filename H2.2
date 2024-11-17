@@ -1,0 +1,49 @@
+/**
+ * Stack multiple copies of the same curve.
+ * Each copy occupies the same fraction of the height.
+ * @param {number} n - the number of copies
+ * @param {Curve} c - the original curve
+ * @returns {Curve} - a curve stacked with n copies of c
+*/
+function stack_n(n, c) {
+    return t => {
+        const segment = math_floor(t * n); // Identifiera vilket segment t ligger i
+        const local_t = (t * n) - segment; // Lokal t för varje segment
+        return translate(0, segment / n)(
+            scale(1, 1 / n)(c) // Här skickar vi korrekt antal argument
+        )(local_t);
+    };
+}
+/**
+ Skalar en kurva.
+ *@param {number} sx - Skalning i x-led
+ *@param {number} sy - Skalning i y-led
+ *@returns {function} - En funktion som tar en kurva och returnerar en skalad kurva
+*/
+function scale(sx, sy) {
+    return c => t => make_point(
+        sx * x_of(c(t)),
+        sy * y_of(c(t))
+    );
+}
+/**
+ * Förskjuter en kurva.
+ * @param {number} dx - Förskjutning i x-led
+ * @param {number} dy - Förskjutning i y-led
+ * @returns {function} - En funktion som tar en kurva och returnerar en förskjuten kurva
+*/
+function translate(dx, dy) {
+    return c => t => make_point(
+        x_of(c(t)) + dx,
+        y_of(c(t)) + dy
+    );
+}
+
+// Testa funktionen
+const test_curve = t => make_point(
+    t,
+    0.5 + math_sin(4 * math_PI * t) / 2
+);
+
+// Rita ut en staplad kurva med 5 kopior
+draw_points(10000)(stack_n(5, test_curve));
